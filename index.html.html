@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Desafío Vocacional del Saber — Perú (v3 Integrado)</title>
+<style>
+  :root{
+    --bg1:#f7fbff; --card:#ffffff; --accent:#2563eb; --muted:#56607a;
+    --accent-2:#ff6b6b; --glass:rgba(14,30,60,0.04);
+  }
+  *{box-sizing:border-box;font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg1),#eef6ff);color:#0b2545}
+  .wrap{max-width:1100px;margin:28px auto;padding:18px;}
+  .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 10px 40px rgba(10,20,40,0.06);display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
+  header{display:flex;align-items:center;gap:12px}
+  .logo{width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;box-shadow:0 10px 30px rgba(37,99,235,0.12)}
+  h1{margin:0;font-size:20px}
+  p.lead{color:var(--muted);margin:6px 0 0 0;font-size:13px}
+  .left{padding:8px}
+  .career-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .career{flex:1 1 140px;padding:12px;border-radius:10px;border:1px solid rgba(2,6,23,0.04);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9));text-align:center;transition:transform .18s,box-shadow .18s;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .career:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(37,99,235,0.06)}
+  .career.selected{box-shadow:0 18px 40px rgba(37,99,235,0.12);transform:translateY(-6px)}
+  .tag{font-size:12px;color:var(--muted);margin-top:6px}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.98));padding:12px;border-radius:10px;border:1px solid rgba(2,6,23,0.03)}
+  .levels{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .lvl{padding:8px 10px;border-radius:8px;border:1px solid rgba(2,6,23,0.04);cursor:pointer;background:linear-gradient(90deg,white,rgba(246,249,255,0.6))}
+  .lvl.locked{opacity:0.4;cursor:not-allowed}
+  .quiz-area{margin-top:12px}
+  .question{padding:12px;border-radius:10px;background:linear-gradient(90deg,rgba(245,248,255,0.9),white);border:1px solid rgba(2,6,23,0.03)}
+  .choices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  .choice{padding:10px;border-radius:8px;border:1px solid rgba(2,6,23,0.06);cursor:pointer;background:linear-gradient(90deg,white,rgba(250,250,255,0.95));transition:transform .12s,box-shadow .12s;display:flex;align-items:center;gap:10px}
+  .choice:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(10,20,40,0.04)}
+  .choice.correct{border-color:var(--accent);background:linear-gradient(90deg,rgba(96,165,250,0.08),white)}
+  .choice.wrong{border-color:var(--accent-2);background:linear-gradient(90deg,rgba(255,107,107,0.06),white)}
+  .rightcol{padding:12px;display:flex;flex-direction:column;gap:12px}
+  .small{font-size:13px;color:var(--muted)}
+  .meter{height:12px;background:#eef6ff;border-radius:999px;overflow:hidden;margin-top:8px}
+  .meter > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#60a5fa);border-radius:999px;transition:width 400ms}
+  .btn{display:inline-block;padding:10px 12px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;border:none;cursor:pointer;font-weight:700}
+  .ghost{background:transparent;border:1px solid rgba(2,6,23,0.06);color:var(--muted);padding:8px 10px;border-radius:8px}
+  .confetti{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;display:none;z-index:9999}
+  footer{grid-column:1/-1;margin-top:12px;color:var(--muted);font-size:13px}
+  .badge{display:inline-block;padding:6px 8px;border-radius:999px;background:var(--glass);font-weight:700}
+  .icon-wrap{width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(0,0,0,0.03),rgba(255,255,255,0.6))}
+  @media (max-width:920px){.card{grid-template-columns:1fr;}.career{flex:1 1 45%}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="application" aria-label="Desafío Vocacional del Saber">
+      <div class="left">
+        <header>
+          <div class="logo">DV</div>
+          <div>
+            <h1>Desafío Vocacional del Saber — Perú</h1>
+            <p class="lead">Elegí tu carrera y subí niveles. Versión integrada con imágenes vectoriales (offline).</p>
+          </div>
+        </header>
+
+        <section style="margin-top:12px">
+          <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div class="small">Selecciona tu carrera</div>
+                <div style="font-weight:800;margin-top:6px" id="selectedCareer">—</div>
+              </div>
+              <div style="text-align:right">
+                <div class="small">Nivel actual</div>
+                <div style="font-weight:800;font-size:18px" id="lvlDisplay">—</div>
+              </div>
+            </div>
+
+            <div class="career-grid" id="careerGrid"></div>
+
+            <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+              <button class="btn" id="startBtn" disabled>Jugar</button>
+              <button class="ghost" id="resetBtn">Borrar progreso</button>
+              <div style="flex:1"></div>
+              <div class="small">2/3 aciertos para desbloquear siguiente nivel</div>
+            </div>
+          </div>
+
+          <div class="panel quiz-area" id="quizPanel" style="margin-top:12px;display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div class="small">Nivel</div>
+                <div style="font-weight:800" id="currentLvl">1</div>
+              </div>
+              <div style="text-align:right">
+                <div class="small">Progreso nivel</div>
+                <div id="scoreText">0/3</div>
+              </div>
+            </div>
+
+            <div class="meter" aria-hidden="true"><i id="meterFill"></i></div>
+
+            <div id="questionBox" style="margin-top:12px"></div>
+
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn" id="nextBtn" disabled>Siguiente</button>
+              <button class="ghost" id="exitBtn">Salir</button>
+              <div style="flex:1"></div>
+              <div class="small" id="hintText"></div>
+            </div>
+          </div>
+
+        </section>
+      </div>
+
+      <aside class="rightcol">
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:800">Estado</div>
+            <div class="small" id="points">0 pts</div>
+          </div>
+
+          <div style="margin-top:8px" class="small">Niveles</div>
+          <div id="levelsBox" class="levels"></div>
+
+          <div style="margin-top:12px" class="small">Compartir progreso</div>
+          <input id="shareInput" readonly style="width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1px solid rgba(2,6,23,0.04)"/>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button class="btn" id="copyBtn">Copiar</button>
+            <button class="ghost" id="downloadBtn">Descargar</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;text-align:center">
+          <div style="font-weight:800">Resultado</div>
+          <div class="small" id="finalText" style="margin-top:8px">Aún no juegas</div>
+        </div>
+      </aside>
+
+      <footer>Progreso guardado en tu navegador (localStorage). Archivo único listo para compartir.</footer>
+    </div>
+  </div>
+
+  <canvas class="confetti" id="confetti"></canvas>
+
+<script>
+(function(){
+  // careers with inline SVG strings for icons (keeps file self-contained)
+  const svgs = {
+    enfermeria: `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#E6F7FF"/><path d="M12 7v10M7 12h10" stroke="#0B5FFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    cocina: `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#FFF6E6"/><path d="M7 8h10M9 12h6M8 16h8" stroke="#FF6B3A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    farmacia: `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#F0FFF4"/><path d="M12 7v10M9 10h6" stroke="#059669" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    contabilidad: `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#FFF7F0"/><path d="M6 17h12M6 13h8M6 9h4" stroke="#D97706" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    programacion: `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#F3F6FF"/><path d="M8 9l-2 3 2 3M16 9l2 3-2 3M12 6v12" stroke="#4C1D95" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  };
+
+  const careers = {
+    enfermeria: { name:"Enfermería", msgs: {
+      final:"¡Qué mano la tuya! 💉 Eres un enfermer@ con futuro: empatía y ciencia.",
+      unlock:"¡Salvando vidas y subiendo niveles!"
+    }, levels:[
+      [{q:"Si ves a alguien con una herida leve, ¿qué harías primero?", a:["Presionar y limpiar con agua","Buscar en Google","Cantarle una canción"], correct:0},
+       {q:"¿Qué elemento es clave para higiene en el hospital?", a:["Guantes y lavado de manos","Gorra de chef","Sombrero"], correct:0},
+       {q:"¿Cuál es una actitud esencial en enfermería?", a:["Empatía","Ser lejano","Ignorar"], correct:0}],
+      [{q:"Si un paciente tiene fiebre, ¿qué podrías usar para medirla?", a:["Termómetro","Regla","Cuchara"], correct:0},
+       {q:"¿Qué se hace antes de administrar una inyección?", a:["Verificar identidad y prescripción","Pedir una selfie","Colocar música"], correct:0},
+       {q:"¿Qué ayuda a prevenir infecciones?", a:["Lavado de manos frecuente","No ventilar la habitación","Guardar la espera"], correct:0}],
+      [{q:"En urgencias, ¿qué significa 'ABCs' en cuidado inicial?", a:["Vía aérea, respiración, circulación","Nada importante","Solo respirar"], correct:0},
+       {q:"¿Qué acción es adecuada si alguien se desmaya?", a:["Comprobar respuesta y respirar","Ignorarlo","Pedir opiniones online"], correct:0},
+       {q:"¿Qué registrarías en la historia clínica?", a:["Signos vitales y observaciones","La receta que no es tuya","El clima del día"], correct:0}],
+      [{q:"¿Qué significa 'asepsia'?", a:["Evitar microorganismos durante procedimientos","Cantar y bailar","Poner música"], correct:0},
+       {q:"¿Qué precaución es clave con pacientes contagiosos?", a:["Uso de equipo de protección personal (EPP)","Abrir la ventana y listo","Enviar por mensaje"], correct:0},
+       {q:"¿Qué es una vía intravenosa (Vía IV)?", a:["Tubo para administrar líquidos/medicamentos directo a la vena","Un tipo de vendaje","Un instrumento musical"], correct:0}],
+      [{q:"¿Qué es una reacción anafiláctica? (pista: grave)", a:["Reacción alérgica severa y rápida","Un resfriado leve","Un sabor nuevo"], correct:0},
+       {q:"¿Cuál es un signo vital importante?", a:["Pulso, respiración, presión y temperatura","El color de la ropa","La hora de desayuno"], correct:0},
+       {q:"¿Qué actitud es clave en emergencias?", a:["Calma y acción rápida","Entrar en pánico","Esperar siempre"], correct:0}]
+    ]},
+    cocina: { name:"Cocina", msgs:{
+      final:"¡Chef en camino! 🍳 Tu sazón y curiosidad te llevan lejos.",
+      unlock:"¡A cocinar se ha dicho! 🔥"
+    }, levels:[
+      [{q:"¿Cuál es el truco para que el arroz quede suelto?", a:["Lavar el arroz y respetar la proporción agua/arroz","Agregar todo y revolver cada minuto","Echar limón"], correct:0},
+       {q:"¿Qué es esencial para medir ingredientes líquidos?", a:["Jarra medidora","Ojos","Tazón al azar"], correct:0},
+       {q:"Si el aceite salta al freír, ¿qué pasó?", a:["Hay humedad en el alimento","El aceite es mágico","Se necesita más sal"], correct:0}],
+      [{q:"¿Qué hace la sal en la carne antes de cocinarla?", a:["Realza sabor y ayuda a la textura","La vuelve azul","Hace que flote"], correct:0},
+       {q:"¿Qué es 'al dente' en pasta?", a:["Con ligera resistencia al morder","Muy blanda","Crujiente"], correct:0},
+       {q:"¿Para qué sirve el baño María?", a:["Cocción suave y controlada (ej. flan)","Asar a la parrilla","Cortar verduras"], correct:0}],
+      [{q:"¿Qué técnica ayuda a dorar mejor una carne?", a:["Secar la superficie antes de sellar","Enfriarla mucho","Cortar en cubos diminutos"], correct:0},
+       {q:"¿Qué es desglasar una sartén?", a:["Añadir líquido para recoger sabores pegados","Limpiar con agua","Apagar fuego y listo"], correct:0},
+       {q:"¿Qué ingrediente ayuda a fermentar masas?", a:["Levadura","Azúcar sola","Aceite"], correct:0}],
+      [{q:"¿Qué medida ayuda a conservar alimentos en casa?", a:["Enfriar y envasar correctamente","Dejar todo fuera","Poner en platos abiertos"], correct:0},
+       {q:"¿Qué técnica evita contaminación cruzada?", a:["Usar tablas separadas para carnes y verduras","Usar la misma tabla","No lavar utensilios"], correct:0},
+       {q:"¿Cuál es un corte básico de cocina?", a:["Juliana","Pintura","Dibujo"], correct:0}],
+      [{q:"¿Qué es 'mise en place'?", a:["Tener todo preparado antes de cocinar","Un postre","Un horno"], correct:0},
+       {q:"¿Qué herramienta es ideal para filetear pescado?", a:["Cuchillo fileteador","Rallador","Cuchillo para pan"], correct:0},
+       {q:"¿Qué ayuda a equilibrar una salsa muy ácida?", a:["Agregar un poco de azúcar o mantequilla","Más ácido","Solo sal"], correct:0}]
+    ]},
+    farmacia: { name:"Farmacia", msgs:{
+      final:"¡Salud y ciencia! 💊 Estás listo para aprender y cuidar.",
+      unlock:"¡Formulando conocimiento! 🧪"
+    }, levels:[
+      [{q:"¿Qué significa OTC en medicamentos?", a:["Venta sin receta (over-the-counter)","Necesita orden judicial","Solo en la farmacia central"], correct:0},
+       {q:"¿Qué es una tableta?", a:["Forma sólida de medicamento","Líquido","Una bebida"], correct:0},
+       {q:"Antes de dispensar, ¿qué revisas?", a:["Receta y posología","Solo el precio","Nada"], correct:0}],
+      [{q:"¿Qué indica la fecha de vencimiento?", a:["Hasta cuándo es seguro y eficaz el medicamento","Hasta cuándo se puede abrir la caja","El día de la tienda"], correct:0},
+       {q:"¿Qué es un excipiente?", a:["Sustancia inactiva que acompaña al principio activo","Otro medicamento","Un paciente"], correct:0},
+       {q:"¿Qué significa 'sublingual'?", a:["Bajo la lengua","En el brazo","En el oído"], correct:0}],
+      [{q:"¿Qué es farmacovigilancia?", a:["Monitoreo de efectos adversos","Campaña publicitaria","Tipo de receta"], correct:0},
+       {q:"¿Qué precaución en almacenamiento de medicamentos?", a:["Controlar temperatura y humedad","Dejar al sol","Congelar todo"], correct:0},
+       {q:"¿Qué papel tiene el farmacéutico con el paciente?", a:["Informar sobre uso correcto y efectos","Vender sin explicar","Solo cobrar"], correct:0}],
+      [{q:"¿Qué significa 'posología'?", a:["Dosis y frecuencia de administración","Sabor del medicamento","La marca"], correct:0},
+       {q:"¿Qué es una receta magistral?", a:["Preparación personalizada por el farmacéutico","Una receta de cocina","Un trámite legal"], correct:0},
+       {q:"¿Por qué leer interacciones medicamentosas?", a:["Para evitar efectos adversos al mezclar fármacos","Porque sí","Para confundir al paciente"], correct:0}],
+      [{q:"¿Qué es biodisponibilidad?", a:["Fracción de dosis que alcanza la circulación","Una caja de medicamentos","Una medida de peso"], correct:0},
+       {q:"¿Qué es una vía parenteral?", a:["Administración fuera del tracto digestivo (ej. IV)","Tomar por boca","Aplicar como crema"], correct:0},
+       {q:"¿Qué se reporta en farmacovigilancia?", a:["Efectos adversos y sospechas de reacciones","Precios","Publicidad"], correct:0}]
+    ]},
+    contabilidad: { name:"Contabilidad", msgs:{
+      final:"¡Números con sentido! 💼 Tienes ojo para las finanzas.",
+      unlock:"¡Balanceando conocimientos! 📊"
+    }, levels:[
+      [{q:"¿Qué muestra el estado de resultados?", a:["Ingresos y gastos (ganancias/pérdidas)","El clima","El menú"], correct:0},
+       {q:"¿Qué es un activo?", a:["Recurso que genera beneficio","Una deuda","Un gasto"], correct:0},
+       {q:"¿Qué es una factura?", a:["Comprobante de una venta/compra","Una carta","Un contrato"], correct:0}],
+      [{q:"¿Qué es el libro mayor?", a:["Registro de cuentas con sus movimientos","Un cajón","Una persona"], correct:0},
+       {q:"¿Qué representa el patrimonio?", a:["Activos menos pasivos","Ingresos totales","Solo efectivo"], correct:0},
+       {q:"¿Qué es un asiento contable?", a:["Registro que refleja una operación económica","Un billete","Una nómina"], correct:0}],
+      [{q:"¿Qué grava el IGV en Perú?", a:["Consumo (impuesto general a las ventas)","La felicidad","La lluvia"], correct:0},
+       {q:"¿Qué son cuentas por cobrar?", a:["Dinero que terceros deben a la empresa","Gastos futuros","Inventario"], correct:0},
+       {q:"¿Qué muestra el flujo de caja?", a:["Entradas y salidas de efectivo","Solo ventas","Solo gastos"], correct:0}],
+      [{q:"¿Qué significa conciliación bancaria?", a:["Comparar libros con extracto bancario","Enviar dinero","Cerrar la cuenta"], correct:0},
+       {q:"¿Qué es NIIF (IFRS)?", a:["Normas internacionales de información financiera","Un festival","Un impuesto"], correct:0},
+       {q:"¿Qué es el análisis financiero?", a:["Evaluar la salud financiera con ratios","Diseñar logos","Contratar personal"], correct:0}],
+      [{q:"¿Qué es depreciación?", a:["Pérdida de valor de un activo con el tiempo","Aumentar valor","Un impuesto nuevo"], correct:0},
+       {q:"¿Qué mide la liquidez?", a:["Capacidad para pagar deudas a corto plazo","Rentabilidad","Número de empleados"], correct:0},
+       {q:"¿Qué es un ratio financiero?", a:["Relación entre dos magnitudes para análisis","Un documento legal","Una foto"], correct:0}]
+    ]},
+    programacion: { name:"Programación", msgs:{
+      final:"¡Código y corazón! 💻 Tu lógica te lleva lejos.",
+      unlock:"¡Compilando conocimientos! ⚙️"
+    }, levels:[
+      [{q:"¿Qué hace HTML en una web?", a:["Estructura el contenido","La hace más rápida","La protege"], correct:0},
+       {q:"¿Con qué se estiliza una página web?", a:["CSS","SQL","PNG"], correct:0},
+       {q:"¿Qué es una variable?", a:["Un contenedor para guardar datos","Un error","Un virus"], correct:0}],
+      [{q:"¿Qué hace un 'loop' (bucle)?", a:["Repetir instrucciones","Eliminar archivos","Imprimir"], correct:0},
+       {q:"¿Qué es una función?", a:["Bloque de código reutilizable","Una imagen","Un número"], correct:0},
+       {q:"¿Qué es Git?", a:["Sistema de control de versiones","Un editor","Un lenguaje"], correct:0}],
+      [{q:"¿Qué es 'debugging'?", a:["Buscar y arreglar errores","Un nuevo lenguaje","Un framework"], correct:0},
+       {q:"¿Qué significa API?", a:["Interfaz que permite comunicación entre programas","Un tipo de imagen","Una alarma"], correct:0},
+       {q:"¿Qué es una base de datos?", a:["Lugar donde se almacenan datos organizados","Una carpeta física","Un navegador"], correct:0}],
+      [{q:"¿Qué es 'deploy'?", a:["Poner una aplicación en línea","Borrar todo","Solo en local"], correct:0},
+       {q:"¿Qué es 'testing'?", a:["Probar software para asegurar calidad","Escribir documentos","Diseñar logos"], correct:0},
+       {q:"¿Qué implica 'escalabilidad'?", a:["Capacidad de manejar más usuarios/carga","Tener más colores","Usar más memoria siempre"], correct:0}],
+      [{q:"¿Qué es una API REST? (breve)", a:["Estilo de comunicación HTTP entre sistemas","Un tipo de base de datos","Un editor"], correct:0},
+       {q:"¿Qué es CI/CD?", a:["Prácticas para integrar y desplegar cambios automáticamente","Un videojuego","Un editor"], correct:0},
+       {q:"¿Por qué versionar el código?", a:["Controlar cambios y colaborar mejor","Porque sí","Para perder código"], correct:0}]
+    ]}
+  };
+
+  // helper shuffle
+  function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+  // UI refs
+  const careerGrid = document.getElementById('careerGrid');
+  const selectedCareer = document.getElementById('selectedCareer');
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const quizPanel = document.getElementById('quizPanel');
+  const questionBox = document.getElementById('questionBox');
+  const nextBtn = document.getElementById('nextBtn');
+  const exitBtn = document.getElementById('exitBtn');
+  const meterFill = document.getElementById('meterFill');
+  const scoreText = document.getElementById('scoreText');
+  const currentLvl = document.getElementById('currentLvl');
+  const lvlDisplay = document.getElementById('lvlDisplay');
+  const levelsBox = document.getElementById('levelsBox');
+  const points = document.getElementById('points');
+  const shareInput = document.getElementById('shareInput');
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const finalText = document.getElementById('finalText');
+  const hintText = document.getElementById('hintText');
+  const confettiCanvas = document.getElementById('confetti');
+
+  // state
+  const KEY='dv_peru_v3_integrado';
+  let state = {}; // structure: state[careerKey] = {unlocked:1..5,levels:{1:{passed,correct}},overallCorrect}
+  let selectedKey = null;
+  let session = null;
+
+  function loadState(){ try{ state = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ state = {}; } }
+  function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); updateShare(); renderLevels(); renderStatus(); }
+
+  // build career grid with inline svgs
+  function initGrid(){
+    careerGrid.innerHTML='';
+    Object.keys(careers).forEach(k=>{
+      const div=document.createElement('div'); div.className='career'; div.dataset.key=k;
+      const icon = svgs[k] || '';
+      div.innerHTML = `<div class="icon-wrap">${icon}</div><div style="font-weight:800">${careers[k].name}</div><div class="tag">5 niveles · 3 preguntas/nivel</div>`;
+      div.addEventListener('click', ()=>selectCareer(k));
+      careerGrid.appendChild(div);
+    });
+  }
+
+  function selectCareer(k){
+    selectedKey=k; selectedCareer.textContent=careers[k].name; startBtn.disabled=false;
+    document.querySelectorAll('.career').forEach(c=> c.classList.toggle('selected', c.dataset.key===k));
+    renderLevels();
+    renderStatus();
+  }
+
+  startBtn.addEventListener('click', ()=>{ if(!selectedKey) return; if(!state[selectedKey]) initCareerState(selectedKey); openLevel(state[selectedKey].unlocked); });
+
+  resetBtn.addEventListener('click', ()=>{ if(!selectedKey) return alert('Selecciona una carrera primero.'); if(confirm('Borrar todo el progreso de ' + careers[selectedKey].name + '?')){ delete state[selectedKey]; saveState(); selectedKey=null; selectedCareer.textContent='—'; startBtn.disabled=true; initGrid(); } });
+
+  function initCareerState(k){
+    state[k]={unlocked:1, overallCorrect:0, levels:{}};
+    for(let i=1;i<=5;i++) state[k].levels[i]={passed:false,correct:0};
+    saveState();
+  }
+
+  function openLevel(level){
+    const qset = JSON.parse(JSON.stringify(careers[selectedKey].levels[level-1])); // clone
+    qset.forEach(q=>{
+      const options = q.a.map((t,i)=>({t,orig:i}));
+      shuffle(options);
+      q.options = options;
+      q.correctIndex = options.findIndex(o=> o.orig === q.correct);
+    });
+    session = {level, qset, idx:0, correct:0, answered:0};
+    showQuestion();
+    quizPanel.style.display='block';
+    hintText.textContent = careers[selectedKey].msgs.unlock || '';
+    currentLvl.textContent = level;
+    lvlDisplay.textContent = state[selectedKey].unlocked;
+    updateMeter();
+  }
+
+  function showQuestion(){
+    const q = session.qset[session.idx];
+    questionBox.innerHTML = '';
+    const qdiv = document.createElement('div'); qdiv.className='question';
+    qdiv.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><div style="width:44px;height:44;border-radius:8px;display:flex;align-items:center;justify-content:center">${svgs[selectedKey]}</div><div style="font-weight:800">Pregunta ${session.idx+1}:</div></div><div style="margin-top:8px">${q.q}</div>`;
+    const choices = document.createElement('div'); choices.className='choices';
+    q.options.forEach((opt, i)=>{
+      const ch = document.createElement('div'); ch.className='choice'; ch.tabIndex=0;
+      ch.innerHTML = `<div style="width:28px;text-align:center;opacity:0.85">${String.fromCharCode(65+i)}</div><div style="flex:1">${opt.t}</div>`;
+      ch.addEventListener('click', ()=>selectChoice(ch, i));
+      choices.appendChild(ch);
+    });
+    qdiv.appendChild(choices);
+    questionBox.appendChild(qdiv);
+    nextBtn.disabled = true;
+    scoreText.textContent = session.correct + '/' + session.qset.length;
+    updateMeter();
+  }
+
+  function selectChoice(el, idx){
+    if(el.classList.contains('locked')) return;
+    const all = el.parentNode.querySelectorAll('.choice'); all.forEach(x=> x.classList.add('locked'));
+    const q = session.qset[session.idx];
+    if(idx === q.correctIndex){
+      el.classList.add('correct');
+      session.correct++;
+      showTinyFeedback(true);
+    } else {
+      el.classList.add('wrong');
+      all[q.correctIndex].classList.add('correct');
+      showTinyFeedback(false);
+    }
+    session.answered++;
+    nextBtn.disabled = false;
+    updateMeter();
+  }
+
+  function showTinyFeedback(ok){
+    hintText.textContent = ok ? '¡Buena! 😎' : 'Uy, casi… repásalo 😉';
+    setTimeout(()=> hintText.textContent = '', 1200);
+  }
+
+  nextBtn.addEventListener('click', ()=>{
+    if(session.idx < session.qset.length -1){
+      session.idx++; showQuestion();
+    } else {
+      finishLevel();
+    }
+  });
+
+  function finishLevel(){
+    const lvl=session.level;
+    const passed = session.correct >= 2;
+    state[selectedKey].levels[lvl].passed = passed;
+    state[selectedKey].levels[lvl].correct = session.correct;
+    state[selectedKey].overallCorrect += session.correct;
+    if(passed && state[selectedKey].unlocked < 5) state[selectedKey].unlocked = Math.max(state[selectedKey].unlocked, lvl+1);
+    saveState();
+    quizPanel.style.display='none';
+    finalText.textContent = passed ? `¡Nivel ${lvl} superado! (${session.correct}/3)` : `Nivel ${lvl} no superado (${session.correct}/3) — intenta otra vez.`;
+    if(passed) burstConfetti();
+    const allPassed = [1,2,3,4,5].every(n => state[selectedKey].levels[n].passed);
+    if(allPassed) showFinalScreen();
+    else renderLevels();
+  }
+
+  function renderLevels(){
+    levelsBox.innerHTML='';
+    if(!selectedKey || !state[selectedKey]) return;
+    for(let i=1;i<=5;i++){
+      const el = document.createElement('div'); el.className='lvl';
+      if(i > state[selectedKey].unlocked) el.classList.add('locked');
+      const s = state[selectedKey].levels[i];
+      el.textContent = 'Nivel ' + i + (s && s.passed ? ' ✓' : '');
+      if(!el.classList.contains('locked')) el.addEventListener('click', ()=> openLevel(i));
+      levelsBox.appendChild(el);
+    }
+    points.textContent = (state[selectedKey] ? state[selectedKey].overallCorrect : 0) + ' pts';
+  }
+
+  function renderStatus(){
+    shareInput.value = '';
+    if(selectedKey && state[selectedKey]) {
+      lvlDisplay.textContent = state[selectedKey].unlocked;
+      points.textContent = state[selectedKey].overallCorrect + ' pts';
+      updateShare();
+    } else {
+      lvlDisplay.textContent = '—'; points.textContent = '0 pts';
+    }
+  }
+
+  function updateMeter(){
+    const pct = Math.round((session ? (session.correct / (session.qset.length || 3)) * 100 : 0));
+    meterFill.style.width = pct + '%';
+    scoreText.textContent = session ? session.correct + '/' + session.qset.length : '0/3';
+  }
+
+  function updateShare(){
+    if(!selectedKey || !state[selectedKey]) { shareInput.value=''; return; }
+    const payload = {career:selectedKey, data: state[selectedKey]};
+    const enc = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    shareInput.value = location.origin + location.pathname + '#prog=' + enc;
+  }
+
+  document.getElementById('copyBtn').addEventListener('click', ()=>{ if(!shareInput.value) return alert('Nada para copiar'); navigator.clipboard.writeText(shareInput.value).then(()=>alert('Enlace copiado'))});
+  document.getElementById('downloadBtn').addEventListener('click', ()=>{
+    if(!selectedKey || !state[selectedKey]) return alert('Selecciona una carrera con progreso');
+    const data = JSON.stringify(state[selectedKey], null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download = selectedKey + '_progreso.json'; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 3000);
+  });
+
+  document.getElementById('exitBtn').addEventListener('click', ()=>{ quizPanel.style.display='none'; });
+
+  function showFinalScreen(){
+    const msg = careers[selectedKey].msgs.final;
+    const name = careers[selectedKey].name;
+    const overlay = document.createElement('div'); overlay.style.position='fixed'; overlay.style.left=0; overlay.style.top=0; overlay.style.right=0; overlay.style.bottom=0;
+    overlay.style.background='rgba(6,10,20,0.6)'; overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center'; overlay.style.zIndex=9998;
+    const box = document.createElement('div'); box.style.background='white'; box.style.padding='24px'; box.style.borderRadius='12px'; box.style.maxWidth='520px'; box.style.textAlign='center';
+    box.innerHTML = `<div style="font-weight:800;font-size:20px;color:#0b2545">🎉 ¡Felicidades!</div>
+      <div style="margin-top:10px">${msg}</div>
+      <div style="margin-top:12px;font-weight:700">${state[selectedKey].overallCorrect}/15 puntos</div>
+      <div style="margin-top:14px"><button id="closeFinal" class="btn">Cerrar</button> <button id="shareFinal" class="ghost">Compartir</button></div>`;
+    overlay.appendChild(box); document.body.appendChild(overlay);
+    burstConfetti(1200);
+    document.getElementById('closeFinal').addEventListener('click', ()=>{ overlay.remove(); });
+    document.getElementById('shareFinal').addEventListener('click', ()=>{ updateShare(); navigator.clipboard.writeText(shareInput.value).then(()=>alert('Enlace de progreso copiado'))});
+  }
+
+  // simple confetti
+  function burstConfetti(duration=400){
+    const confetti = confettiCanvas;
+    confetti.width = window.innerWidth; confetti.height = window.innerHeight;
+    const ctx = confetti.getContext('2d');
+    let particles = [];
+    const colors = ['#ff6b6b','#ffd166','#60a5fa','#7c5cff','#34d399'];
+    for(let i=0;i<80;i++){
+      particles.push({
+        x: Math.random()*confetti.width,
+        y: Math.random()*confetti.height - confetti.height/2,
+        vx: (Math.random()-0.5)*6,
+        vy: Math.random()*4+2,
+        size: Math.random()*6+4,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        rot: Math.random()*360,
+        vr: (Math.random()-0.5)*10
+      });
+    }
+    confetti.style.display='block';
+    const start = Date.now();
+    function frame(){
+      ctx.clearRect(0,0,confetti.width,confetti.height);
+      particles.forEach(p=>{
+        ctx.save();
+        ctx.translate(p.x,p.y);
+        ctx.rotate(p.rot*Math.PI/180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size);
+        ctx.restore();
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      });
+      if(Date.now() - start < duration){
+        requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0,0,confetti.width,confetti.height);
+        confetti.style.display='none';
+      }
+    }
+    frame();
+  }
+
+  // import progress from hash
+  function tryImport(){
+    if(location.hash && location.hash.startsWith('#prog=')){
+      try{
+        const enc = location.hash.replace('#prog=','');
+        const raw = decodeURIComponent(escape(atob(enc)));
+        const payload = JSON.parse(raw);
+        if(payload && payload.career && payload.data){
+          state[payload.career] = payload.data; saveState(); alert('Progreso importado');
+        }
+      }catch(e){ console.warn('import failed', e) }
+      history.replaceState(null,'',location.pathname);
+    }
+  }
+
+  // init
+  function init(){
+    loadState(); initGrid(); tryImport();
+    renderStatus();
+    const keys = Object.keys(state);
+    if(keys.length>0) selectCareer(keys[0]);
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>
